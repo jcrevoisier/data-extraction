@@ -4,6 +4,7 @@ import pickle
 import os.path
 from google_auth_oauthlib.flow import InstalledAppFlow
 from google.auth.transport.requests import Request
+from google.oauth2 import service_account
 from googleapiclient.discovery import build
 from email.mime.text import MIMEText
 import base64
