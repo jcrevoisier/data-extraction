@@ -13,9 +13,6 @@ from googleapiclient.discovery import build
 from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import InstalledAppFlow
 from google.auth.transport.requests import Request
-from flask import Flask
-
-app = Flask(__name__)
 
 # Initialize Instaloader
 L = instaloader.Instaloader()
@@ -108,7 +105,6 @@ def add_event_to_spreadsheet(service, spreadsheet_id, day, date, post_id):
     except Exception as e:
         print(f"Error adding to spreadsheet: {e}")
 
-@app.route('/')
 def main():
     print(f"Monitoring Instagram account: {USERNAME}")
     last_post_id = None
@@ -151,5 +147,4 @@ def main():
         print(f"An error occurred: {e}")
 
 if __name__ == "__main__":
-    port = int(os.environ.get('PORT', 8080))
-    app.run(host='0.0.0.0', port=port)
+    main()
