@@ -27,31 +27,14 @@ USERNAME = "workbn92"
 # Email configuration
 EMAIL = "bachatanow.app@gmail.com"  # This email will be used for both sending and receiving alerts
 
-# If modifying these scopes, delete the file token.pickle.
-SCOPES = [
-    'https://www.googleapis.com/auth/gmail.send',
-    'https://www.googleapis.com/auth/spreadsheets'
-]
+SERVICE_ACCOUNT_FILE = 'bachatanow-41c57052efd9.json'
+SCOPES = ['https://www.googleapis.com/auth/gmail.send',
+          'https://www.googleapis.com/auth/spreadsheets']
 
 def get_credentials():
-    creds = None
-    if os.path.exists('token.pickle'):
-        with open('token.pickle', 'rb') as token:
-            creds = pickle.load(token)
-    if not creds or not creds.valid:
-        if creds and creds.expired and creds.refresh_token:
-            creds.refresh(Request())
-        else:
-            flow = InstalledAppFlow.from_client_secrets_file(
-                'credentials.json', SCOPES)
-            creds = flow.run_local_server(port=0)
-        with open('token.pickle', 'wb') as token:
-            pickle.dump(creds, token)
+    creds = service_account.Credentials.from_service_account_file(
+        SERVICE_ACCOUNT_FILE, scopes=SCOPES)
     return creds
-
-def get_gmail_service():
-    creds = get_credentials()
-    return build('gmail', 'v1', credentials=creds)
 
 def send_email(service, subject, body):
     message = MIMEText(body)
