@@ -15,6 +15,9 @@ from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import InstalledAppFlow
 from google.auth.transport.requests import Request
 from accounts_config.mapping import Mapping
+import logging
+
+logging.basicConfig(filename='/home/bachatanow_app/data-extraction/script.log', level=logging.INFO)
 
 # Initialize Instaloader
 L = instaloader.Instaloader()
@@ -53,7 +56,7 @@ def get_sheets_credentials():
         )
         return creds
     except exceptions.MalformedError as e:
-        print(f"Error creating credentials: {e}")
+        logging.info(f"Error creating credentials: {e}")
         return None
 
 def get_gmail_credentials():
@@ -87,7 +90,7 @@ def get_gmail_credentials():
             )
             auth_url, _ = flow.authorization_url(prompt='consent')
 
-            print(f"Please visit this URL to authorize the application: {auth_url}")
+            logging.info(f"Please visit this URL to authorize the application: {auth_url}")
             code = input("Enter the authorization code: ")
 
             flow.fetch_token(code=code)
@@ -107,9 +110,9 @@ def send_email(service, subject, body):
     raw_message = base64.urlsafe_b64encode(message.as_bytes()).decode('utf-8')
     try:
         service.users().messages().send(userId='me', body={'raw': raw_message}).execute()
-        print("Email alert sent successfully")
+        logging.info("Email alert sent successfully")
     except Exception as e:
-        print(f"Failed to send email: {e}")
+        logging.info(f"Failed to send email: {e}")
 
 def check_new_post(account):
     try:
@@ -119,7 +122,7 @@ def check_new_post(account):
         posts = profile.get_posts()
         return next(posts)
     except LoginRequiredException:
-        print("Login required. Please check your Instagram credentials.")
+        logging.info("Login required. Please check your Instagram credentials.")
         return None
     except StopIteration:
         return None
@@ -147,9 +150,9 @@ def add_event_to_spreadsheet(service, spreadsheet_id, day, date, post_id):
             valueInputOption='USER_ENTERED',
             insertDataOption='INSERT_ROWS',
             body=body).execute()
-        print(f"Added new row to spreadsheet: {result.get('updates').get('updatedRange')}")
+        logging.info(f"Added new row to spreadsheet: {result.get('updates').get('updatedRange')}")
     except Exception as e:
-        print(f"Error adding to spreadsheet: {e}")
+        logging.info(f"Error adding to spreadsheet: {e}")
 
 def main():
     try:
@@ -162,47 +165,41 @@ def main():
         SPREADSHEET_ID = '1u5dG4CU4bxm4pw3kEh3hZicql7ZG_XkWp7aTYddufTQ'  # Replace with your actual spreadsheet ID
 
         accounts = ['workbn92']
-        while True:
-            try:
-                for account in accounts:
-                    print(f"Monitoring Instagram account: {account}")
-                    latest_post = check_new_post(account)
+        try:
+            for account in accounts:
+                logging.info(f"Monitoring Instagram account: {account}")
+                latest_post = check_new_post(account)
 
-                    if latest_post and latest_post.shortcode != last_post_id:
-                        print(f"New post detected: {latest_post.url}")
-                        print(f"Post ID: {latest_post.shortcode}")
+                if latest_post and latest_post.shortcode != last_post_id:
+                    logging.info(f"New post detected: {latest_post.url}")
+                    logging.info(f"Post ID: {latest_post.shortcode}")
 
-                        caption = latest_post.caption.lower() if latest_post.caption else ""
-                        found_days = [day for day in days if day in caption]
+                    caption = latest_post.caption.lower() if latest_post.caption else ""
+                    found_days = [day for day in days if day in caption]
 
-                        if found_days:
-                            for day in found_days:
-                                next_date = get_next_date(day)
-                                print(f"Next {day}: {next_date}")
-                                add_event_to_spreadsheet(sheets_service, SPREADSHEET_ID, day, next_date, latest_post.shortcode)
+                    if found_days:
+                        for day in found_days:
+                            next_date = get_next_date(day)
+                            logging.info(f"Next {day}: {next_date}")
+                            add_event_to_spreadsheet(sheets_service, SPREADSHEET_ID, day, next_date, latest_post.shortcode)
 
-                        subject = f"New Instagram Post from {account}"
-                        body = f"A new Instagram post has been detected for {account}.\n\nPost URL: {latest_post.url}\nPost ID: {latest_post.shortcode}"
+                    subject = f"New Instagram Post from {account}"
+                    body = f"A new Instagram post has been detected for {account}.\n\nPost URL: {latest_post.url}\nPost ID: {latest_post.shortcode}"
 
-                        if found_days:
-                            body += "\n\nUpcoming dates:"
-                            for day in found_days:
-                                next_date = get_next_date(day)
-                                body += f"\nNext {day}: {next_date}"
+                    if found_days:
+                        body += "\n\nUpcoming dates:"
+                        for day in found_days:
+                            next_date = get_next_date(day)
+                            body += f"\nNext {day}: {next_date}"
 
-                        send_email(gmail_service, subject, body)
+                    send_email(gmail_service, subject, body)
 
-                        last_post_id = latest_post.shortcode
+                    last_post_id = latest_post.shortcode
 
-            except Exception as e:
-                print(f"An error occurred: {e}")
+        except Exception as e:
+            logging.info(f"An error occurred: {e}")
 
-            time.sleep(60)
-    except Exception as e:
-        with open('error_log.txt', 'w') as f:
-            f.write(f"An error occurred: {str(e)}\n")
-            f.write(traceback.format_exc())
-            sys.exit(1)
+        time.sleep(60)
 
 if __name__ == "__main__":
     main()
