@@ -1,15 +1,26 @@
 #!/bin/bash
 
-# Activate the virtual environment
-source /home/bachatanow_app/data-extraction/venv/bin/activate
-
-# Print environment information
+echo "Script started at $(date)"
+echo "Current user: $(whoami)"
 echo "Current directory: $(pwd)"
-echo "Python version: $(python --version)"
-echo "Python path: $(which python)"
 
-# Run the script and capture output
-python /home/bachatanow_app/data-extraction/main.py 2>&1 | tee /home/bachatanow_app/data-extraction/script_output.log
+VENV_PATH="/home/bachatanow_app/data-extraction/venv"
+PYTHON="$VENV_PATH/bin/python"
 
-# Deactivate the virtual environment
+echo "Activating virtual environment"
+source "$VENV_PATH/bin/activate"
+if [ $? -ne 0 ]; then
+    echo "Failed to activate virtual environment"
+    exit 1
+fi
+
+echo "Virtual environment activated"
+echo "Python version: $($PYTHON --version)"
+echo "Python path: $PYTHON"
+
+echo "Running main script"
+$PYTHON /home/bachatanow_app/data-extraction/main.py
+
+echo "Script finished at $(date)"
+
 deactivate

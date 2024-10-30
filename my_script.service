@@ -8,6 +8,8 @@ Restart=on-failure
 RestartSec=5
 User=bachatanow_app
 WorkingDirectory=/home/bachatanow_app/data-extraction
+StandardOutput=append:/home/bachatanow_app/data-extraction/service_output.log
+StandardError=append:/home/bachatanow_app/data-extraction/service_error.log
 
 [Install]
 WantedBy=multi-user.target
