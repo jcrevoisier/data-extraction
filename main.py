@@ -198,7 +198,7 @@ def main():
                 print(f"An error occurred: {e}")
 
             time.sleep(60)
-    except:
+    except Exception as e:
         with open('error_log.txt', 'w') as f:
             f.write(f"An error occurred: {str(e)}\n")
             f.write(traceback.format_exc())
