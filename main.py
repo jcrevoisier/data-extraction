@@ -32,7 +32,7 @@ import os
 from google.oauth2 import service_account
 from google.auth import exceptions
 
-def get_credentials():
+def get_sheets_credentials()():
     try:
         # Create a dictionary with the service account info
         service_account_info = {
@@ -51,12 +51,55 @@ def get_credentials():
 
         creds = service_account.Credentials.from_service_account_info(
             service_account_info,
-            scopes=['https://www.googleapis.com/auth/gmail.send', 'https://www.googleapis.com/auth/spreadsheets']
+            scopes=['https://www.googleapis.com/auth/spreadsheets']
         )
         return creds
     except exceptions.MalformedError as e:
         print(f"Error creating credentials: {e}")
         return None
+
+def get_credentials():
+    creds = None
+
+    # Hardcoded client configuration
+    client_config = {
+        "installed": {
+            "client_id": os.environ.get("GOOGLE_CLIENT_ID"),
+            "project_id": "bachatanow",
+            "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+            "token_uri": "https://oauth2.googleapis.com/token",
+            "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+            "client_secret": os.environ.get("GOOGLE_CLIENT_SECRET"),
+            "redirect_uris": ["http://localhost"]
+        }
+    }
+
+    if os.path.exists('token.pickle'):
+        with open('token.pickle', 'rb') as token:
+            creds = pickle.load(token)
+
+    if not creds or not creds.valid:
+        if creds and creds.expired and creds.refresh_token:
+            creds.refresh(Request())
+        else:
+            flow = Flow.from_client_config(
+                client_config,
+                scopes=['https://www.googleapis.com/auth/gmail.send'],
+                redirect_uri='urn:ietf:wg:oauth:2.0:oob'
+            )
+            auth_url, _ = flow.authorization_url(prompt='consent')
+
+            print(f"Please visit this URL to authorize the application: {auth_url}")
+            code = input("Enter the authorization code: ")
+
+            flow.fetch_token(code=code)
+            creds = flow.credentials
+
+        with open('token.pickle', 'wb') as token:
+            pickle.dump(creds, token)
+
+    return creds
+
 
 def send_email(service, subject, body):
     message = MIMEText(body)
@@ -113,9 +156,10 @@ def add_event_to_spreadsheet(service, spreadsheet_id, day, date, post_id):
 def main():
     print(f"Monitoring Instagram account: {USERNAME}")
     last_post_id = None
-    creds = get_credentials()
+    gmail_creds =
+    sheets_creds = get_sheets_credentials()
     gmail_service = build('gmail', 'v1', credentials=creds)
-    sheets_service = build('sheets', 'v4', credentials=creds)
+    sheets_service = build('sheets', 'v4', credentials=sheets_creds)
     days = ['lunes', 'martes', 'miercoles', 'jueves', 'viernes', 'sabado', 'domingo']
     SPREADSHEET_ID = '1u5dG4CU4bxm4pw3kEh3hZicql7ZG_XkWp7aTYddufTQ'  # Replace with your actual spreadsheet ID
 
