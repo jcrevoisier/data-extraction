@@ -33,8 +33,11 @@ SCOPES = ['https://www.googleapis.com/auth/gmail.send',
           'https://www.googleapis.com/auth/spreadsheets']
 
 def get_credentials():
+    print(f'SERVICE_ACCOUNT_FILE : {SERVICE_ACCOUNT_FILE}')
+    print(f'SCOPES : {SCOPES}')
     creds = service_account.Credentials.from_service_account_file(
         SERVICE_ACCOUNT_FILE, scopes=SCOPES)
+    print(f'creds : {creds}')
     return creds
 
 def send_email(service, subject, body):
@@ -74,15 +77,15 @@ def get_next_date(day):
 def add_event_to_spreadsheet(service, spreadsheet_id, day, date, post_id):
     range_ = 'Sheet1!A:J'  # Use 'Sheet1' instead of 'events'
     values = [
-        ["The host", "Calle Ferraz, 38, Madrid", date, day, "22.00 - 03.00", 
+        ["The host", "Calle Ferraz, 38, Madrid", date, day, "22.00 - 03.00",
          "X Lokura", "12, 20", "15", "thehostclub.38", post_id]
     ]
     body = {'values': values}
     try:
         result = service.spreadsheets().values().append(
-            spreadsheetId=spreadsheet_id, 
+            spreadsheetId=spreadsheet_id,
             range=range_,
-            valueInputOption='USER_ENTERED', 
+            valueInputOption='USER_ENTERED',
             insertDataOption='INSERT_ROWS',
             body=body).execute()
         print(f"Added new row to spreadsheet: {result.get('updates').get('updatedRange')}")
@@ -104,25 +107,25 @@ def main():
         if latest_post and latest_post.shortcode != last_post_id:
             print(f"New post detected: {latest_post.url}")
             print(f"Post ID: {latest_post.shortcode}")
-            
+
             caption = latest_post.caption.lower() if latest_post.caption else ""
             found_days = [day for day in days if day in caption]
-            
+
             if found_days:
                 for day in found_days:
                     next_date = get_next_date(day)
                     print(f"Next {day}: {next_date}")
                     add_event_to_spreadsheet(sheets_service, SPREADSHEET_ID, day, next_date, latest_post.shortcode)
-            
+
             subject = f"New Instagram Post from {USERNAME}"
             body = f"A new Instagram post has been detected for {USERNAME}.\n\nPost URL: {latest_post.url}\nPost ID: {latest_post.shortcode}"
-            
+
             if found_days:
                 body += "\n\nUpcoming dates:"
                 for day in found_days:
                     next_date = get_next_date(day)
                     body += f"\nNext {day}: {next_date}"
-            
+
             send_email(gmail_service, subject, body)
 
             last_post_id = latest_post.shortcode
