@@ -14,6 +14,7 @@ from googleapiclient.discovery import build
 from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import InstalledAppFlow
 from google.auth.transport.requests import Request
+from accounts_config.mapping import Mapping
 
 # Initialize Instaloader
 L = instaloader.Instaloader()
@@ -21,9 +22,6 @@ L = instaloader.Instaloader()
 # Add these at the beginning of your script
 INSTAGRAM_USERNAME = "workbn92"
 INSTAGRAM_PASSWORD = "Elenita_Es_La_Mas_Guapa_26102024"
-
-# Instagram username to monitor
-USERNAME = "workbn92"
 
 # Email configuration
 EMAIL = "bachatanow.app@gmail.com"  # This email will be used for both sending and receiving alerts
@@ -113,11 +111,11 @@ def send_email(service, subject, body):
     except Exception as e:
         print(f"Failed to send email: {e}")
 
-def check_new_post():
+def check_new_post(account):
     try:
         if not L.context.is_logged_in:
             L.login(INSTAGRAM_USERNAME, INSTAGRAM_PASSWORD)
-        profile = instaloader.Profile.from_username(L.context, USERNAME)
+        profile = instaloader.Profile.from_username(L.context, Mapping[account]['username'])
         posts = profile.get_posts()
         return next(posts)
     except LoginRequiredException:
@@ -154,7 +152,6 @@ def add_event_to_spreadsheet(service, spreadsheet_id, day, date, post_id):
         print(f"Error adding to spreadsheet: {e}")
 
 def main():
-    print(f"Monitoring Instagram account: {USERNAME}")
     last_post_id = None
     gmail_creds = get_gmail_credentials()
     sheets_creds = get_sheets_credentials()
@@ -163,37 +160,43 @@ def main():
     days = ['lunes', 'martes', 'miercoles', 'jueves', 'viernes', 'sabado', 'domingo']
     SPREADSHEET_ID = '1u5dG4CU4bxm4pw3kEh3hZicql7ZG_XkWp7aTYddufTQ'  # Replace with your actual spreadsheet ID
 
-    try:
-        latest_post = check_new_post()
+    accounts = ['workbn92']
+    while True:
+        try:
+            for account in accounts:
+                print(f"Monitoring Instagram account: {account}")
+                latest_post = check_new_post(account)
 
-        if latest_post and latest_post.shortcode != last_post_id:
-            print(f"New post detected: {latest_post.url}")
-            print(f"Post ID: {latest_post.shortcode}")
+                if latest_post and latest_post.shortcode != last_post_id:
+                    print(f"New post detected: {latest_post.url}")
+                    print(f"Post ID: {latest_post.shortcode}")
 
-            caption = latest_post.caption.lower() if latest_post.caption else ""
-            found_days = [day for day in days if day in caption]
+                    caption = latest_post.caption.lower() if latest_post.caption else ""
+                    found_days = [day for day in days if day in caption]
 
-            if found_days:
-                for day in found_days:
-                    next_date = get_next_date(day)
-                    print(f"Next {day}: {next_date}")
-                    add_event_to_spreadsheet(sheets_service, SPREADSHEET_ID, day, next_date, latest_post.shortcode)
+                    if found_days:
+                        for day in found_days:
+                            next_date = get_next_date(day)
+                            print(f"Next {day}: {next_date}")
+                            add_event_to_spreadsheet(sheets_service, SPREADSHEET_ID, day, next_date, latest_post.shortcode)
 
-            subject = f"New Instagram Post from {USERNAME}"
-            body = f"A new Instagram post has been detected for {USERNAME}.\n\nPost URL: {latest_post.url}\nPost ID: {latest_post.shortcode}"
+                    subject = f"New Instagram Post from {account}"
+                    body = f"A new Instagram post has been detected for {account}.\n\nPost URL: {latest_post.url}\nPost ID: {latest_post.shortcode}"
 
-            if found_days:
-                body += "\n\nUpcoming dates:"
-                for day in found_days:
-                    next_date = get_next_date(day)
-                    body += f"\nNext {day}: {next_date}"
+                    if found_days:
+                        body += "\n\nUpcoming dates:"
+                        for day in found_days:
+                            next_date = get_next_date(day)
+                            body += f"\nNext {day}: {next_date}"
 
-            send_email(gmail_service, subject, body)
+                    send_email(gmail_service, subject, body)
 
-            last_post_id = latest_post.shortcode
+                    last_post_id = latest_post.shortcode
 
-    except Exception as e:
-        print(f"An error occurred: {e}")
+        except Exception as e:
+            print(f"An error occurred: {e}")
+        
+        time.sleep(60)
 
 if __name__ == "__main__":
     main()
