@@ -158,7 +158,7 @@ def main():
     last_post_id = None
     gmail_creds = get_gmail_credentials()
     sheets_creds = get_sheets_credentials()
-    gmail_service = build('gmail', 'v1', credentials=creds)
+    gmail_service = build('gmail', 'v1', credentials=gmail_creds)
     sheets_service = build('sheets', 'v4', credentials=sheets_creds)
     days = ['lunes', 'martes', 'miercoles', 'jueves', 'viernes', 'sabado', 'domingo']
     SPREADSHEET_ID = '1u5dG4CU4bxm4pw3kEh3hZicql7ZG_XkWp7aTYddufTQ'  # Replace with your actual spreadsheet ID
