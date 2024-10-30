@@ -1,0 +1,12 @@
+[Unit]
+Description=Data Extraction Python Script Service
+After=network.target
+
+[Service]
+ExecStart=/usr/bin/python3 /home/bachatanow_app/data-extraction/main.py
+Restart=always
+User=bachatanow_app
+WorkingDirectory=/home/bachatanow_app/data-extraction
+
+[Install]
+WantedBy=multi-user.target
