@@ -28,17 +28,34 @@ USERNAME = "workbn92"
 # Email configuration
 EMAIL = "bachatanow.app@gmail.com"  # This email will be used for both sending and receiving alerts
 
-SERVICE_ACCOUNT_FILE = 'bachatanow-41c57052efd9.json'
-SCOPES = ['https://www.googleapis.com/auth/gmail.send',
-          'https://www.googleapis.com/auth/spreadsheets']
+import os
+from google.oauth2 import service_account
+from google.auth import exceptions
 
 def get_credentials():
-    print(f'SERVICE_ACCOUNT_FILE : {SERVICE_ACCOUNT_FILE}')
-    print(f'SCOPES : {SCOPES}')
-    creds = service_account.Credentials.from_service_account_file(
-        SERVICE_ACCOUNT_FILE, scopes=SCOPES)
-    print(f'creds : {creds}')
-    return creds
+    try:
+        # Create a dictionary with the service account info
+        service_account_info = {
+            "type": "service_account",
+            "project_id": os.environ.get("GOOGLE_PROJECT_ID"),
+            "private_key_id": os.environ.get("GOOGLE_PRIVATE_KEY_ID"),
+            "private_key": os.environ.get("GOOGLE_PRIVATE_KEY").replace('\\n', '\n'),
+            "client_email": os.environ.get("GOOGLE_CLIENT_EMAIL"),
+            "client_id": os.environ.get("GOOGLE_CLIENT_ID"),
+            "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+            "token_uri": "https://oauth2.googleapis.com/token",
+            "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+            "client_x509_cert_url": os.environ.get("GOOGLE_CLIENT_X509_CERT_URL")
+        }
+
+        creds = service_account.Credentials.from_service_account_info(
+            service_account_info,
+            scopes=['https://www.googleapis.com/auth/gmail.send', 'https://www.googleapis.com/auth/spreadsheets']
+        )
+        return creds
+    except exceptions.MalformedError as e:
+        print(f"Error creating credentials: {e}")
+        return None
 
 def send_email(service, subject, body):
     message = MIMEText(body)
