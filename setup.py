@@ -28,7 +28,7 @@ update_json_file('credentials.json', {
 })
 
 # Update service-account.json
-update_json_file('service-account.json', {
+update_json_file('bachatanow-41c57052efd9.json', {
     'PRIVATE_KEY_ID': 'private-key-id',
     'PRIVATE_KEY': 'private-key',
     'CLIENT_EMAIL': 'client-email',
