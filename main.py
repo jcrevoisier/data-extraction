@@ -16,8 +16,14 @@ from google_auth_oauthlib.flow import InstalledAppFlow
 from google.auth.transport.requests import Request
 from accounts_config.mapping import Mapping
 import logging
+from dotenv import load_dotenv
 
-logging.basicConfig(filename='/home/bachatanow_app/data-extraction/script.log', level=logging.INFO)
+# Load environment variables
+load_dotenv()
+
+# Set up logging
+logging.basicConfig(filename='script.log', level=logging.INFO,
+                    format='%(asctime)s - %(levelname)s - %(message)s')
 
 # Initialize Instaloader
 L = instaloader.Instaloader()
