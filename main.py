@@ -32,7 +32,7 @@ import os
 from google.oauth2 import service_account
 from google.auth import exceptions
 
-def get_sheets_credentials()():
+def get_sheets_credentials():
     try:
         # Create a dictionary with the service account info
         service_account_info = {
@@ -58,7 +58,7 @@ def get_sheets_credentials()():
         print(f"Error creating credentials: {e}")
         return None
 
-def get_credentials():
+def get_gmail_credentials():
     creds = None
 
     # Hardcoded client configuration
@@ -156,7 +156,7 @@ def add_event_to_spreadsheet(service, spreadsheet_id, day, date, post_id):
 def main():
     print(f"Monitoring Instagram account: {USERNAME}")
     last_post_id = None
-    gmail_creds =
+    gmail_creds = get_gmail_credentials()
     sheets_creds = get_sheets_credentials()
     gmail_service = build('gmail', 'v1', credentials=creds)
     sheets_service = build('sheets', 'v4', credentials=sheets_creds)
