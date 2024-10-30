@@ -152,51 +152,57 @@ def add_event_to_spreadsheet(service, spreadsheet_id, day, date, post_id):
         print(f"Error adding to spreadsheet: {e}")
 
 def main():
-    last_post_id = None
-    gmail_creds = get_gmail_credentials()
-    sheets_creds = get_sheets_credentials()
-    gmail_service = build('gmail', 'v1', credentials=gmail_creds)
-    sheets_service = build('sheets', 'v4', credentials=sheets_creds)
-    days = ['lunes', 'martes', 'miercoles', 'jueves', 'viernes', 'sabado', 'domingo']
-    SPREADSHEET_ID = '1u5dG4CU4bxm4pw3kEh3hZicql7ZG_XkWp7aTYddufTQ'  # Replace with your actual spreadsheet ID
+    try:
+        last_post_id = None
+        gmail_creds = get_gmail_credentials()
+        sheets_creds = get_sheets_credentials()
+        gmail_service = build('gmail', 'v1', credentials=gmail_creds)
+        sheets_service = build('sheets', 'v4', credentials=sheets_creds)
+        days = ['lunes', 'martes', 'miercoles', 'jueves', 'viernes', 'sabado', 'domingo']
+        SPREADSHEET_ID = '1u5dG4CU4bxm4pw3kEh3hZicql7ZG_XkWp7aTYddufTQ'  # Replace with your actual spreadsheet ID
 
-    accounts = ['workbn92']
-    while True:
-        try:
-            for account in accounts:
-                print(f"Monitoring Instagram account: {account}")
-                latest_post = check_new_post(account)
+        accounts = ['workbn92']
+        while True:
+            try:
+                for account in accounts:
+                    print(f"Monitoring Instagram account: {account}")
+                    latest_post = check_new_post(account)
 
-                if latest_post and latest_post.shortcode != last_post_id:
-                    print(f"New post detected: {latest_post.url}")
-                    print(f"Post ID: {latest_post.shortcode}")
+                    if latest_post and latest_post.shortcode != last_post_id:
+                        print(f"New post detected: {latest_post.url}")
+                        print(f"Post ID: {latest_post.shortcode}")
 
-                    caption = latest_post.caption.lower() if latest_post.caption else ""
-                    found_days = [day for day in days if day in caption]
+                        caption = latest_post.caption.lower() if latest_post.caption else ""
+                        found_days = [day for day in days if day in caption]
 
-                    if found_days:
-                        for day in found_days:
-                            next_date = get_next_date(day)
-                            print(f"Next {day}: {next_date}")
-                            add_event_to_spreadsheet(sheets_service, SPREADSHEET_ID, day, next_date, latest_post.shortcode)
+                        if found_days:
+                            for day in found_days:
+                                next_date = get_next_date(day)
+                                print(f"Next {day}: {next_date}")
+                                add_event_to_spreadsheet(sheets_service, SPREADSHEET_ID, day, next_date, latest_post.shortcode)
 
-                    subject = f"New Instagram Post from {account}"
-                    body = f"A new Instagram post has been detected for {account}.\n\nPost URL: {latest_post.url}\nPost ID: {latest_post.shortcode}"
+                        subject = f"New Instagram Post from {account}"
+                        body = f"A new Instagram post has been detected for {account}.\n\nPost URL: {latest_post.url}\nPost ID: {latest_post.shortcode}"
 
-                    if found_days:
-                        body += "\n\nUpcoming dates:"
-                        for day in found_days:
-                            next_date = get_next_date(day)
-                            body += f"\nNext {day}: {next_date}"
+                        if found_days:
+                            body += "\n\nUpcoming dates:"
+                            for day in found_days:
+                                next_date = get_next_date(day)
+                                body += f"\nNext {day}: {next_date}"
 
-                    send_email(gmail_service, subject, body)
+                        send_email(gmail_service, subject, body)
 
-                    last_post_id = latest_post.shortcode
+                        last_post_id = latest_post.shortcode
 
-        except Exception as e:
-            print(f"An error occurred: {e}")
-        
-        time.sleep(60)
+            except Exception as e:
+                print(f"An error occurred: {e}")
+
+            time.sleep(60)
+    except:
+        with open('error_log.txt', 'w') as f:
+            f.write(f"An error occurred: {str(e)}\n")
+            f.write(traceback.format_exc())
+            sys.exit(1)
 
 if __name__ == "__main__":
     main()
