@@ -83,3 +83,30 @@
 2024-11-01 10:01:25,370 - INFO - file_cache is only supported with oauth2client<4.0.0
 2024-11-01 10:01:25,370 - INFO - file_cache is only supported with oauth2client<4.0.0
 2024-11-01 10:01:25,559 - INFO - Monitoring Instagram account: workbn92
+2024-11-01 10:55:01,409 - INFO - file_cache is only supported with oauth2client<4.0.0
+2024-11-01 10:55:01,441 - INFO - file_cache is only supported with oauth2client<4.0.0
+2024-11-01 10:55:01,661 - INFO - Monitoring Instagram account: workbn92
+2024-11-01 11:01:45,010 - INFO - file_cache is only supported with oauth2client<4.0.0
+2024-11-01 11:01:45,010 - INFO - file_cache is only supported with oauth2client<4.0.0
+2024-11-01 11:01:45,309 - INFO - Monitoring Instagram account: workbn92
+2024-11-01 11:01:45,467 - INFO - An error occurred: 'dict' object has no attribute 'shortcode'
+2024-11-01 11:14:54,581 - INFO - file_cache is only supported with oauth2client<4.0.0
+2024-11-01 11:14:54,581 - INFO - file_cache is only supported with oauth2client<4.0.0
+2024-11-01 11:14:54,760 - INFO - Monitoring Instagram account: workbn92
+2024-11-01 11:14:54,917 - INFO - An error occurred: 'dict' object has no attribute 'id'
+2024-11-01 11:15:43,511 - INFO - file_cache is only supported with oauth2client<4.0.0
+2024-11-01 11:15:43,511 - INFO - file_cache is only supported with oauth2client<4.0.0
+2024-11-01 11:15:43,715 - INFO - Monitoring Instagram account: workbn92
+2024-11-01 11:15:43,872 - INFO - An error occurred: 'dict' object has no attribute 'id'
+2024-11-01 11:16:03,933 - INFO - file_cache is only supported with oauth2client<4.0.0
+2024-11-01 11:16:03,949 - INFO - file_cache is only supported with oauth2client<4.0.0
+2024-11-01 11:16:04,106 - INFO - Monitoring Instagram account: workbn92
+2024-11-01 11:16:04,311 - INFO - An error occurred: 'dict' object has no attribute 'id'
+2024-11-01 11:17:41,146 - INFO - file_cache is only supported with oauth2client<4.0.0
+2024-11-01 11:17:41,162 - INFO - file_cache is only supported with oauth2client<4.0.0
+2024-11-01 11:17:41,308 - INFO - Monitoring Instagram account: workbn92
+2024-11-01 11:17:41,476 - INFO - New post detected: https://www.instagram.com/p/DBqXt7ztTcV/
+2024-11-01 11:17:41,476 - INFO - Post ID: 17946184934895230
+2024-11-01 11:17:41,476 - INFO - Next miercoles: 2024-11-06
+2024-11-01 11:17:43,251 - INFO - Added new row to spreadsheet: Sheet1!A23:J23
+2024-11-01 11:17:43,974 - INFO - Email alert sent successfully

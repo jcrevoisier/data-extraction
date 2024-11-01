@@ -43,9 +43,11 @@ def get_instagram_account_info():
     response = requests.get(url)
     if response.status_code == 200:
         print(f'account info ok : {response.json()}')
+        logging.info(f'account info ok : {response.json()}')
         return response.json()
     else:
         print(f"Error: {response.status_code}")
+        logging.info(f"Error: {response.status_code}")
         return None
 
 def get_sheets_credentials():
@@ -140,6 +142,7 @@ def get_instagram_business_account_id(username):
         return response.json().get('id')
     else:
         print(f"Error: {response.text}")
+        logging.info(f"Error: {response.text}")
         return None
 
 def check_new_post(username):
@@ -166,6 +169,7 @@ def check_new_post(username):
             }
     else:
         print(f"Error: {response.status_code}, {response.text}")
+        logging.info(f"Error: {response.status_code}, {response.text}")
     return None
 
     # except requests.exceptions.RequestException as e:
@@ -211,37 +215,41 @@ def main():
     accounts = ['workbn92']
     account_info = get_instagram_account_info()
     print(f'account_info : {account_info}')
+    logging.info(f'account_info : {account_info}')
     try:
         for account in accounts:
             logging.info(f"Monitoring Instagram account: {account}")
             print(f"Monitoring Instagram account: {account}")
             latest_post = check_new_post(account)
             print(f'latest_post : {latest_post}')
-            # if latest_post and latest_post.shortcode != last_post_id:
-            #     logging.info(f"New post detected: {latest_post.url}")
-            #     logging.info(f"Post ID: {latest_post.shortcode}")
-            #
-            #     caption = latest_post.caption.lower() if latest_post.caption else ""
-            #     found_days = [day for day in days if day in caption]
-            #
-            #     if found_days:
-            #         for day in found_days:
-            #             next_date = get_next_date(day)
-            #             logging.info(f"Next {day}: {next_date}")
-            #             add_event_to_spreadsheet(sheets_service, SPREADSHEET_ID, day, next_date, latest_post.shortcode)
-            #
-            #     subject = f"New Instagram Post from {account}"
-            #     body = f"A new Instagram post has been detected for {account}.\n\nPost URL: {latest_post.url}\nPost ID: {latest_post.shortcode}"
-            #
-            #     if found_days:
-            #         body += "\n\nUpcoming dates:"
-            #         for day in found_days:
-            #             next_date = get_next_date(day)
-            #             body += f"\nNext {day}: {next_date}"
-            #
-            #     send_email(gmail_service, subject, body)
-            #
-            #     last_post_id = latest_post.shortcode
+            print(f"latest_post.id : {latest_post['id']}")
+            if latest_post and latest_post['id'] != last_post_id:
+                print(f"New post detected: {latest_post['permalink']}")
+                logging.info(f"New post detected: {latest_post['permalink']}")
+                print(f"Post ID: {latest_post['id']}")
+                logging.info(f"Post ID: {latest_post['id']}")
+
+                caption = latest_post['caption'].lower() if latest_post['caption'] else ""
+                found_days = [day for day in days if day in caption]
+
+                if found_days:
+                    for day in found_days:
+                        next_date = get_next_date(day)
+                        logging.info(f"Next {day}: {next_date}")
+                        add_event_to_spreadsheet(sheets_service, SPREADSHEET_ID, day, next_date, latest_post['id'])
+
+                subject = f"New Instagram Post from {account}"
+                body = f"A new Instagram post has been detected for {account}.\n\nPost URL: {latest_post['permalink']}\nPost ID: {latest_post['id']}"
+
+                if found_days:
+                    body += "\n\nUpcoming dates:"
+                    for day in found_days:
+                        next_date = get_next_date(day)
+                        body += f"\nNext {day}: {next_date}"
+
+                send_email(gmail_service, subject, body)
+
+                last_post_id = latest_post['id']
 
     except Exception as e:
         logging.info(f"An error occurred: {e}")
